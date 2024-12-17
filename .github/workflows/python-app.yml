@@ -1,0 +1,50 @@
+name: Python MNIST Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --no-user --upgrade pip
+        python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        python -m pip install pytest numpy
+    
+    - name: Run parameter count test
+      run: |
+        pytest test_model.py::test_parameter_count -v
+    
+    - name: Run epoch count test
+      run: |
+        pytest test_model.py::test_epoch_count -v
+      if: false  # Disabled by default as it requires GPU/long training time
+    
+    - name: Run accuracy threshold test
+      run: |
+        pytest test_model.py::test_accuracy_threshold -v
+      if: false  # Disabled by default as it requires GPU/long training time 
