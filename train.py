@@ -1,7 +1,7 @@
 import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-from model import MNISTClassifier
+from model2 import MNISTClassifier
 import torch.nn as nn
 import torch.optim as optim
 from training_utils import (print_model_config, print_epoch_stats, 
