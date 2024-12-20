@@ -1,7 +1,8 @@
 import torch
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-from model2 import MNISTClassifier
+from torch.utils.data import DataLoader, SubsetRandomSampler
+import numpy as np
+from model1 import MNISTClassifier
 import torch.nn as nn
 import torch.optim as optim
 from training_utils import (print_model_config, print_epoch_stats, 
@@ -39,10 +40,26 @@ def train_model(max_epochs=15, batch_size=64):
         transforms.Normalize((0.1307,), (0.3081,))
     ])
     
-    train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+    # Load full training dataset
+    full_train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
     test_dataset = datasets.MNIST(root='./data', train=False, transform=transform)
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # Create indices for the split
+    num_train = len(full_train_dataset)
+    indices = list(range(num_train))
+    np.random.shuffle(indices)
+    
+    # Split indices
+    train_idx = indices[:50000]  # First 50000 for training
+    val_idx = indices[50000:]    # Remaining 10000 for validation
+    
+    # Create samplers
+    train_sampler = SubsetRandomSampler(train_idx)
+    val_sampler = SubsetRandomSampler(val_idx)
+    
+    # Create data loaders
+    train_loader = DataLoader(full_train_dataset, batch_size=batch_size, sampler=train_sampler)
+    val_loader = DataLoader(full_train_dataset, batch_size=batch_size, sampler=val_sampler)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     
     # Model, loss and optimizer
@@ -57,6 +74,7 @@ def train_model(max_epochs=15, batch_size=64):
     # Training loop
     train_accuracies = []
     test_accuracies = []
+    val_accuracies = []
     
     for epoch in range(max_epochs):
         model.train()
@@ -79,6 +97,7 @@ def train_model(max_epochs=15, batch_size=64):
         # Calculate metrics
         train_loss = running_loss / len(train_loader)
         train_acc, _ = evaluate_model(model, train_loader, device, criterion)
+        val_acc, val_loss = evaluate_model(model, val_loader, device, criterion)
         test_acc, test_loss = evaluate_model(model, test_loader, device, criterion)
         current_lr = optimizer.param_groups[0]['lr']
         
@@ -87,11 +106,16 @@ def train_model(max_epochs=15, batch_size=64):
         
         train_accuracies.append(train_acc)
         test_accuracies.append(test_acc)
+        val_accuracies.append(val_acc)
     
     print_training_summary(current_lr, train_accuracies, test_accuracies, 
                           max_epochs, max_epochs * len(train_loader))
     
-    return train_accuracies, test_accuracies
+    print("\nValidation Set Performance:")
+    print(f"Best Validation Accuracy: {max(val_accuracies):.2f}%")
+    print(f"Final Validation Accuracy: {val_accuracies[-1]:.2f}%")
+    
+    return train_accuracies, test_accuracies, val_accuracies
 
 if __name__ == "__main__":
     train_model() 
