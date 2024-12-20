@@ -80,8 +80,6 @@ class MNISTClassifier(nn.Module):
         # Output Block
         self.output_block = nn.Sequential(
             nn.Conv2d(in_channels=16, out_channels=10, kernel_size=(1, 1), bias=False),           # 16*10*1*1 = 160
-            nn.BatchNorm2d(10),                                                                   # 10*2 = 20
-            nn.ReLU(),
             nn.AdaptiveAvgPool2d(1)                                                              # Global RF after GAP
         ) # output_size = 1x1x10, RF = Global
 
@@ -115,11 +113,11 @@ class MNISTClassifier(nn.Module):
 # Architecture Features:
 # 1. All convolutions are 3x3 except in transition and output (1x1)
 # 2. BatchNorm after every convolution
-# 3. Dropout(0.10) after every ReLU
+# 3. Dropout (10%) after every ReLU except output block
 # 4. Global Average Pooling in output block
 # 5. No bias in convolutions to reduce parameters
 # 6. Log softmax for better numerical stability
-#
+
 # Receptive Field Calculation:
 # Layer               RF      Jump    RF Calc
 # Input              1       1       -
@@ -133,8 +131,3 @@ class MNISTClassifier(nn.Module):
 # convblock6         25      4       17 + 4*(3-1)
 # convblock7         33      4       25 + 4*(3-1)
 # GAP                Global   -       Global
-#
-# Note: 
-# - RF increases by (kernel_size-1) for each conv layer
-# - After MaxPool, jump multiplies by 2
-# - MaxPool adds 1 to RF but multiplies the jump

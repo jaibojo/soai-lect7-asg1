@@ -71,8 +71,6 @@ class MNISTClassifier(nn.Module):
         # Output Block
         self.output_block = nn.Sequential(
             nn.Conv2d(in_channels=16, out_channels=10, kernel_size=(1, 1), bias=False),           # 16*10*1*1 = 160
-            nn.BatchNorm2d(10),                                                                   # 10*2 = 20
-            nn.ReLU(),
             nn.AdaptiveAvgPool2d(1)                                                              # Global RF after GAP
         ) # output_size = 1x1x10, RF = Global
 

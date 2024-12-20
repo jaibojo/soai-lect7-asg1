@@ -29,23 +29,20 @@ def evaluate_model(model, data_loader, device, criterion):
     avg_loss = total_loss / len(data_loader)
     return accuracy, avg_loss
 
-def print_model_config(total_params, batch_size, device, train_batches):
-    print(f"\nModel Configuration:")
-    print(f"Total trainable parameters: {total_params:,}")
+def print_model_config(model_name, total_params, batch_size, device, batches_per_epoch):
+    print(f"\nModel: {model_name}")
+    print(f"Total trainable parameters: {total_params}")
     print(f"Batch size: {batch_size}")
     print(f"Device: {device}")
-    print(f"Total training batches per epoch: {train_batches}")
+    print(f"Total training batches per epoch: {batches_per_epoch}\n")
     
-    print("-" * 110)
-    print(f"{'Epoch':^7} | {'Batch':^12} | {'Train Loss':^12} | {'Train Acc':^10} | {'Test Loss':^11} | "
-          f"{'Test Acc':^9} | {'Diff':^8} | {'LR':^9}")
-    print("-" * 110)
+    print("--------------------------------------------------------------------------------------------------------")
+    print(" Model |  Epoch  |    Batch     |  Train Loss  | Train Acc  |  Test Loss  | Test Acc  |  Diff   |    LR    ")
+    print("--------------------------------------------------------------------------------------------------------")
 
-def print_epoch_stats(epoch, batch_idx, total_batches, train_loss, train_acc, test_loss, test_acc, lr):
-    batch_info = f"{batch_idx+1}/{total_batches}"
-    acc_diff = test_acc - train_acc
-    print(f"{epoch+1:^7d} | {batch_info:^12} | {train_loss:^12.6f} | {train_acc:^10.2f} | "
-          f"{test_loss:^11.6f} | {test_acc:^9.2f} | {acc_diff:^8.2f} | {lr:^9.7f}")
+def print_epoch_stats(model_name, epoch, batch_idx, total_batches, train_loss, train_acc, 
+                     test_loss, test_acc, current_lr):
+    print(f" {model_name:5} |   {epoch+1:2d}    |   {batch_idx+1:4d}/{total_batches:<4d} |   {train_loss:.6f}   |   {train_acc:.2f}    |  {test_loss:.6f}   |   {test_acc:.2f}   |  {test_acc-train_acc:5.2f}  | {current_lr:.6f}")
 
 def print_training_summary(current_lr, train_accuracies, test_accuracies, max_epochs, total_batches):
     print("-" * 110)

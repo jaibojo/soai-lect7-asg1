@@ -31,7 +31,7 @@ def evaluate_model(model, data_loader, device, criterion):
     avg_loss = total_loss / len(data_loader)
     return accuracy, avg_loss
 
-def train_model(max_epochs=15, batch_size=64):
+def train_model(model_name="Model1", max_epochs=15, batch_size=64):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # Data loading
@@ -69,7 +69,7 @@ def train_model(max_epochs=15, batch_size=64):
     
     # Print initial configuration
     total_params = count_parameters(model)
-    print_model_config(total_params, batch_size, device, len(train_loader))
+    print_model_config(model_name, total_params, batch_size, device, len(train_loader))
     
     # Training loop
     train_accuracies = []
@@ -101,7 +101,7 @@ def train_model(max_epochs=15, batch_size=64):
         test_acc, test_loss = evaluate_model(model, test_loader, device, criterion)
         current_lr = optimizer.param_groups[0]['lr']
         
-        print_epoch_stats(epoch, batch_idx, len(train_loader), train_loss, 
+        print_epoch_stats(model_name, epoch, batch_idx, len(train_loader), train_loss, 
                          train_acc, test_loss, test_acc, current_lr)
         
         train_accuracies.append(train_acc)
@@ -118,4 +118,8 @@ def train_model(max_epochs=15, batch_size=64):
     return train_accuracies, test_accuracies, val_accuracies
 
 if __name__ == "__main__":
-    train_model() 
+    # For Model1
+    train_model("Model1")
+    
+    # For Model2
+    # train_model("Model2") 
